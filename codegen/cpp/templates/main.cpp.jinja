@@ -1,0 +1,27 @@
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+
+
+#include <pybind11/eigen.h>
+{%for func in functions%}
+#include "{{func.name}}.h"
+{%endfor%}
+namespace py = pybind11;
+
+{%for func in functions%}
+template <typename Scalar>
+void {{func.name_cpp}}_binding(
+    {{func.cpp_input_string()}}
+    )
+{
+    sym::{{func.name_cpp}}<Scalar>({{func.cpp_call_string()}});
+}
+
+{%endfor%}
+
+PYBIND11_MODULE(mylib, m)
+{
+    {%for func in functions%}
+    m.def("{{func.name}}", &{{func.name_cpp}}_binding<double>);
+    {%endfor%}
+}
